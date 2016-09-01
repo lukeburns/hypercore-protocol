@@ -16,25 +16,11 @@ var messages = require('./messages')
 var KEEP_ALIVE = Buffer([0])
 
 var DEFAULT_TYPES = [
-  messages.Handshake,
-  messages.Have,
-  messages.Want,
-  messages.Request,
-  messages.Data,
-  messages.Cancel,
-  null, // pause
-  null  // resume
+  messages.Handshake
 ]
 
 var DEFAULT_EVENTS = [
-  'handshake',
-  'have',
-  'want',
-  'request',
-  'data',
-  'cancel',
-  'pause',
-  'resume'
+  'handshake'
 ]
 
 while (DEFAULT_EVENTS.length < 64) { // reserved
@@ -78,35 +64,8 @@ function use (extensions) {
   }
 
   Channel.prototype.handshake = function (message) {
+    // console.log('sending handshake')
     return this.protocol._send(this, 0, message)
-  }
-
-  Channel.prototype.have = function (message) {
-    return this.protocol._send(this, 1, message)
-  }
-
-  Channel.prototype.want = function (message) {
-    return this.protocol._send(this, 2, message)
-  }
-
-  Channel.prototype.request = function (message) {
-    return this.protocol._send(this, 3, message)
-  }
-
-  Channel.prototype.data = function (message) {
-    return this.protocol._send(this, 4, message)
-  }
-
-  Channel.prototype.cancel = function (message) {
-    return this.protocol._send(this, 5, message)
-  }
-
-  Channel.prototype.pause = function () {
-    return this.protocol._send(this, 6, null)
-  }
-
-  Channel.prototype.resume = function () {
-    return this.protocol._send(this, 7, null)
   }
 
   Channel.prototype.end = function () {
@@ -118,6 +77,7 @@ function use (extensions) {
   }
 
   Channel.prototype._onhandshake = function (handshake) {
+    // console.log('on handshake')
     this.protocol._onhandshake(handshake)
   }
 
@@ -210,7 +170,7 @@ function use (extensions) {
 
   Protocol.parseDiscoveryKey = function (buf) {
     if (buf[0] !== 0) throw Error('Invalid message')
-    return messages.Open.decode(buf, 1).feed
+    return messages.Open.decode(buf, 1).key
   }
 
   Protocol.prototype.finalize = function () {
@@ -277,7 +237,7 @@ function use (extensions) {
     this._local[ch.local] = ch
 
     var open = messages.Open.encode({
-      feed: ch.discoveryKey,
+      key: ch.discoveryKey,
       nonce: ch._nonce
     })
 
@@ -391,20 +351,21 @@ function use (extensions) {
   }
 
   Protocol.prototype._onopen = function (remote, data, offset) {
+    // console.log('receiving message')
     try {
       var open = messages.Open.decode(data, offset)
     } catch (err) {
       return this.destroy(err)
     }
 
-    if (open.feed.length !== 32 || open.nonce.length !== 24) return this.destroy(new Error('Invalid open message'))
+    if (open.key.length !== 32 || open.nonce.length !== 24) return this.destroy(new Error('Invalid open message'))
 
-    var keyHex = open.feed.toString('hex')
+    var keyHex = open.key.toString('hex')
     var ch = this.channels[keyHex]
 
     if (!ch) {
       ch = new Channel(this)
-      ch.discoveryKey = open.feed
+      ch.discoveryKey = open.key
       this.channels[keyHex] = ch
     }
 
@@ -419,6 +380,7 @@ function use (extensions) {
   }
 
   Protocol.prototype._onmessage = function (remote, data, offset) {
+    // console.log('received message')
     var channel = this._remote[remote]
 
     if (!channel.key || channel.buffer.length || !channel._ready) {
@@ -440,6 +402,7 @@ function use (extensions) {
 
     try {
       var message = enc ? enc.decode(box, 1) : null
+      // console.log(message)
     } catch (err) {
       return this.destroy(err)
     }

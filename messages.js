@@ -1,5 +1,11 @@
 var protobuf = require('protocol-buffers')
-var fs = require('fs')
-var path = require('path')
 
-module.exports = protobuf(fs.readFileSync(path.join(__dirname, 'schema.proto')))
+module.exports = protobuf(`message Open {
+  required bytes key = 1;
+  required bytes nonce = 2;
+}
+
+message Handshake {
+  required bytes id = 1;
+  repeated string extensions = 2;
+}`)

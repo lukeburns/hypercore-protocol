@@ -1,7 +1,7 @@
 {
-  "name": "hypercore-protocol",
-  "version": "4.4.1",
-  "description": "Stream that implements the hypercore protocol",
+  "name": "peer-protocol",
+  "version": "0.0.1",
+  "description": "Stream protocol that implements multiple channels and extensible messaging",
   "main": "index.js",
   "dependencies": {
     "brfs": "^1.4.3",
@@ -34,12 +34,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mafintosh/hypercore-protocol.git"
+    "url": "https://github.com/lukeburns/peer-protocol.git"
   },
-  "author": "Mathias Buus (@mafintosh)",
+  "author": "Luke Burns",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mafintosh/hypercore-protocol/issues"
+    "url": "https://github.com/lukeburns/peer-protocol/issues"
   },
-  "homepage": "https://github.com/mafintosh/hypercore-protocol"
+  "homepage": "https://github.com/lukeburns/peer-protocol"
 }

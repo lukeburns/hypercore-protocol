@@ -1,29 +1,53 @@
-# hypercore-protocol
+# peer-protocol
 
-Stream that implements the [hypercore](https://github.com/mafintosh/hypercore) protocol
+Stream protocol that implements multiple channels and extensible messaging. A stripped down version of [hypercore-protocol](https://github.com/mafintosh/hypercore-protocol).
 
 ```
-npm install hypercore-protocol
+npm install peer-protocol
 ```
-
-[![build status](https://travis-ci.org/mafintosh/hypercore-protocol.svg?branch=master)](https://travis-ci.org/mafintosh/hypercore-protocol)
 
 ## Usage
 
 ``` js
-var protocol = require('hypercore-protocol')
+var protocol = require('peer-protocol')
 
-var p = protocol()
+var stream = protocol()
 
 // open a channel specified by a 32 byte key
-var channel = p.open(Buffer('deadbeefdeadbeefdeadbeefdeadbeef'))
+var channel = stream.open(Buffer('deadbeefdeadbeefdeadbeefdeadbeef'))
 
-channel.request({block: 42})
-channel.on('data', function (message) {
-  console.log(message) // contains message.block and message.value
+stream.pipe(otherStream).pipe(stream)
+```
+
+## Extension API
+
+#### `protocol = protocol.use(extensionName)`
+
+Use an extension specified by the string name you pass in. Returns a new prototype
+
+Will create a new method on all your channel objects that has the same name as the extension and emit an event with the same name when an extension message is received
+
+``` js
+protocol = protocol.use('ping')
+
+var p = protocol()
+var channel = p.open(someKey)
+
+channel.on('handshake', function () {
+  channel.on('ping', function (message) {
+    console.log('received ping message', message)
+  })
+
+  channel.ping(Buffer('this is a ping message!'))
 })
+```
 
-stream.pipe(anotherStream).pipe(stream)
+Per default all messages are buffers. If you want to encode/decode your messages you can specify an [abstract-encoding](https://github.com/mafintosh/abstract-encoding) compliant encoder as well
+
+``` js
+protocol = protocol.use({
+  ping: someEncoder
+})
 ```
 
 ## API
@@ -144,37 +168,6 @@ Emitted when a pause signal is received
 
 You can always check the paused state by accessing `.remotePaused` and `.amPaused`
 to see wheather or not the remote is pausing us or we are pausing the remote.
-
-## Extension API
-
-#### `protocol = protocol.use(extensionName)`
-
-Use an extension specified by the string name you pass in. Returns a new prototype
-
-Will create a new method on all your channel objects that has the same name as the extension and emit an event with the same name when an extension message is received
-
-``` js
-protocol = protocol.use('ping')
-
-var p = protocol()
-var channel = p.open(someKey)
-
-channel.on('handshake', function () {
-  channel.on('ping', function (message) {
-    console.log('received ping message', message)
-  })
-
-  channel.ping(Buffer('this is a ping message!'))
-})
-```
-
-Per default all messages are buffers. If you want to encode/decode your messages you can specify an [abstract-encoding](https://github.com/mafintosh/abstract-encoding) compliant encoder as well
-
-``` js
-protocol = protocol.use({
-  ping: someEncoder
-})
-```
 
 #### `var bool = p.remoteSupports(extensionName)`
 
