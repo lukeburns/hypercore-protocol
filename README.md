@@ -101,73 +101,13 @@ Will call the timeout function if the remote peer hasn't send any messages withi
 
 ## Channel API
 
-#### `channel.end()`
+#### `channel[extension](data)`
 
-Ends a channel
+Encodes data with the `extension` encoder and sends encoded data.
 
-#### `channel.on('end')`
+#### `channel.on(extension, (data) => { ... })`
 
-Emitted when a channel is ended, either by you or the remote peer.
-No other events will be emitted after this.
-
-#### `channel.request(message)`
-
-Send a request message. See the protobuf schema or more information
-
-#### `channel.on('request', message)`
-
-Emitted when a request message is received
-
-#### `channel.data(message)`
-
-Send a data message. See the protobuf schema or more information
-
-#### `channel.on('data', message)`
-
-Emitted when a data message is received
-
-#### `channel.cancel(message)`
-
-Send a cancel message. See the protobuf schema or more information
-
-#### `channel.on('cancel', message)`
-
-Emitted when a cancel message is received
-
-#### `channel.have(message)`
-
-Send a have message. See the protobuf schema or more information
-
-#### `channel.on('have', message)`
-
-Emitted when a have message is received
-
-#### `channel.want(message)`
-
-Send a want message. See the protobuf schema or more information
-
-#### `channel.on('want', message)`
-
-Emitted when a want message is received
-
-#### `channel.resume()`
-
-Send a resume signal
-
-#### `channel.on('resume')`
-
-Emitted when a resume signal is received
-
-#### `channel.pause()`
-
-Send a pause signal
-
-#### `channel.on('pause')`
-
-Emitted when a pause signal is received
-
-You can always check the paused state by accessing `.remotePaused` and `.amPaused`
-to see wheather or not the remote is pausing us or we are pausing the remote.
+Received data is decoded with `extension` decoder and an event is emitted with the decoded data.
 
 #### `var bool = p.remoteSupports(extensionName)`
 
